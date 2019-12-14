@@ -1,0 +1,82 @@
+app-id: net.sk1project.sK1
+default-branch: stable
+runtime: org.freedesktop.Platform
+runtime-version: '19.08'
+sdk: org.freedesktop.Sdk
+command: sk1
+finish-args:
+  - --socket=x11
+  - --share=ipc
+cleanup:
+  - /include
+modules:
+  - shared-modules/python2.7/python-2.7.json
+
+  - name: pycairo
+    buildsystem: simple
+    build-commands:
+      - pip2 install --no-index --find-links="file://${PWD}" --install-option="--prefix=${FLATPAK_DEST}" pycairo
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/3c/1a/c0478ecab31baae50fda9956547788afbd0ca563adc52c9b03cab30f17eb/pycairo-1.18.2.tar.gz
+        sha256: dcb853fd020729516e8828ad364084e752327d4cff8505d20b13504b32b16531
+
+  - name: ImageMagick
+    config-opts:
+      - --disable-static
+      - --disable-docs
+      - --with-hdri
+      - --with-pic
+    sources:
+      - type: archive
+        url: https://github.com/ImageMagick/ImageMagick/archive/7.0.8-65.tar.gz
+        sha256: 14afaf722d8964ed8de2ebd8184a229e521f1425e18e7274806f06e008bf9aa7
+
+  - name: numpy
+    buildsystem: simple
+    build-commands:
+      - pip2 install --no-index --find-links="file://${PWD}" --install-option="--prefix=${FLATPAK_DEST}" numpy
+    cleanup:
+      - /bin
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/2d/80/1809de155bad674b494248bcfca0e49eb4c5d8bee58f26fe7a0dd45029e2/numpy-1.15.4.zip
+        sha256: 3d734559db35aa3697dadcea492a423118c5c55d176da2f3be9c98d4803fc2a7
+
+  - name: pillow
+    buildsystem: simple
+    build-commands:
+      - pip2 install --no-index --find-links="file://${PWD}" --install-option="--prefix=${FLATPAK_DEST}" Pillow
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/5b/bb/cdc8086db1f15d0664dd22a62c69613cdc00f1dd430b5b19df1bea83f2a3/Pillow-6.2.1.tar.gz
+        sha256: bf4e972a88f8841d8fdc6db1a75e0f8d763e66e3754b03006cbc3854d89f1cb1
+
+  - name: wxpython
+    buildsystem: simple
+    build-commands:
+      - pip2 install --no-index --find-links="file://${PWD}" --install-option="--prefix=${FLATPAK_DEST}" wxpython
+    cleanup:
+      - /bin
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/9a/a1/9c081e04798eb134b63def3db121a6e4436e1d84e76692503deef8e75423/wxPython-4.0.6.tar.gz
+        sha256: 35cc8ae9dd5246e2c9861bb796026bbcb9fb083e4d49650f776622171ecdab37
+      - type: file
+        url: https://files.pythonhosted.org/packages/bf/d7/a2568f4596b75d2c6e2b4094a7e64f620decc7887f69a1f2811931ea15b9/pathlib2-2.3.3.tar.gz
+        sha256: 25199318e8cc3c25dcb45cbe084cc061051336d5a9ea2a12448d3d8cb748f742
+
+  - name: sk1
+    buildsystem: simple
+    build-commands:
+      - python2 setup-sk1.py install --root=/ --optimize=1
+      - install -Dm644 -t /app/share/metainfo net.sk1project.sK1.metainfo.xml
+    sources:
+      - type: file
+        path: net.sk1project.sK1.metainfo.xml
+      - type: archive
+        url: https://downloads.sk1project.net/sk1/2.0rc4/sk1-2.0rc4.tar.gz
+        sha256: 65ef0856389d3972e758d55eea33357a4bccec8b97d95eb8dc6be186a7956063
+      - type: shell
+        commands:
+          - sed -i '/^#/!s/usr/app/g' setup-sk1.py setup.cfg_sk1
