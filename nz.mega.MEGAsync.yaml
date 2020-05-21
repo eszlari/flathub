@@ -1,0 +1,53 @@
+app-id: nz.mega.MEGAsync
+runtime: org.kde.Platform
+runtime-version: '5.14'
+sdk: org.kde.Sdk
+command: megasync
+rename-icon: megasync
+rename-desktop-file: megasync.desktop
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --device=dri
+modules:
+
+  - name: MEGAsync
+    buildsystem: simple
+    build-commands:
+      - cd src/MEGASync/mega &&
+        ./autogen.sh &&
+        ./configure
+        --disable-shared
+        --enable-static
+        --disable-silent-rules
+        --disable-curl-checks
+        --disable-megaapi
+        --with-cryptopp
+        --with-sodium
+        --with-zlib
+        --with-sqlite
+        --with-cares
+        --with-curl
+        --without-freeimage
+        --with-libuv
+        --disable-posix-threads
+        --disable-examples
+        --with-libzen
+        --with-libmediainfo
+      - cd src && qmake "CONFIG += FULLREQUIREMENTS" MEGA.pro &&
+        lrelease MEGASync/MEGASync.pro &&
+        make -j $FLATPAK_BUILDER_N_JOBS &&
+        make INSTALL_ROOT=/ TARGET=/app/bin/megasync install
+      - install -Dm644 nz.mega.MEGAsync.metainfo.xml -t /app/share/metainfo
+    sources:
+      - type: file
+        path: nz.mega.MEGAsync.metainfo.xml
+      # - type: git
+      #   dest: src/MEGASync/mega
+      #   url: https://github.com/meganz/sdk.git
+      #   commit: cd8dae2cf7ce86f1f6079e36eb1ccdf36c58e8e0
+      #   tag: v3.7.0
+      - type: git
+        url: https://github.com/meganz/MEGAsync.git
+        commit: 518b47a86e722eb2319767c09118f72caa3543e5
+        tag: v4.3.1.0_Linux
